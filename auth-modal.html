@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户认证 | 我的静态网站</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        
+        .auth-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .auth-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 16px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .auth-tab.active {
+            color: #667eea;
+        }
+        
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #667eea;
+        }
+        
+        .auth-content {
+            padding: 24px;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-auth {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>用户认证</h2>
+        </div>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="login-tab">登录</button>
+            <button class="auth-tab" id="register-tab">注册</button>
+        </div>
+        
+        <div class="auth-content">
+            <div id="auth-message" class="message"></div>
+            
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="请输入用户名" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="请输入8位密码" required>
+                </div>
+                
+                <button type="submit" class="btn-auth">登录</button>
+            </form>
+            
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-username">用户名</label>
+                    <input type="text" id="register-username" class="form-control" placeholder="3-20位字母和数字" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">密码</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="8位字母和数字组合" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-confirm-password">确认密码</label>
+                    <input type="password" id="register-confirm-password" class="form-control" placeholder="再次输入密码" required>
+                </div>
+                
+                <button type="submit" class="btn-auth">注册</button>
+            </form>
+        </div>
+        
+        <div class="back-link">
+            <a href="index.html">← 返回网站首页</a>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script>
+        // 简化版认证逻辑（用于独立页面）
+        document.addEventListener('DOMContentLoaded', function() {
+            const usersKey = 'openclaw_users';
+            const currentUserKey = 'openclaw_current_user';
+            
+            // 初始化用户数据库
+            if (!localStorage.getItem(usersKey)) {
+                localStorage.setItem(usersKey, JSON.stringify([]));
+            }
+            
+            // 标签切换
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const messageDiv = document.getElementById('auth-message');
+            
+            function switchTab(type) {
+                if (type === 'login') {
+                    loginTab.classList.add('active');
+                    registerTab.classList.remove('active');
+                    loginForm.classList.add('active');
+                    registerForm.classList.remove('active');
+                } else {
+                    registerTab.classList.remove('active');
+                    loginTab.classList.remove('active');
+                    registerTab.classList.add('active');
+                    loginForm.classList.remove('active');
+                    registerForm.classList.add('active');
+                }
+            }
+            
+            loginTab.addEventListener('click', () => switchTab('login'));
+            registerTab.addEventListener('click', () => switchTab('register'));
+            
+            // 显示消息
+            function showMessage(message, type = 'success') {
+                messageDiv.textContent = message;
+                messageDiv.className = `message ${type} show`;
+                
+                setTimeout(() => {
+                    messageDiv.classList.remove('show');
+                }, 3000);
+            }
+            
+            // 哈希函数
+            function hashPassword(password) {
+                let hash = 0;
+                for (let i = 0; i < password.length; i++) {
+                    const char = password.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString(36);
+            }
+            
+            // 验证用户名
+            function validateUsername(username) {
+                const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
+                return usernameRegex.test(username);
+            }
+            
+            // 验证密码
+            function validatePassword(password) {
+                const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/;
+                return passwordRegex.test(password);
+            }
+            
+            // 登录表单提交
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('login-username').value.trim();
+                const password = document.getElementById('login-password').value;
+                
+                const users = JSON.parse(localStorage.getItem(usersKey));
+                const user = users.find(u => u.username === username);
+                
+                if (!user) {
+                    showMessage('用户名或密码错误', 'error');
+                    return;
+                }
+                
+                if (user.password !== hashPassword(password)) {
+                    showMessage('用户名或密码错误', 'error');
+                    return;
+                }
+                
+                // 登录成功
+                localStorage.setItem(currentUserKey, JSON.stringify({
+                    id: user.id,
+                    username: user.username,
+                    createdAt: user.createdAt
+                }));
+                
+                showMessage('登录成功！正在跳转...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            });
+            
+            // 注册表单提交
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('register-username').value.trim();
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                
+                // 验证用户名
+                if (!validateUsername(username)) {
+                    showMessage('用户名只能包含字母和数字，长度3-20位', 'error');
+                    return;
+                }
+                
+                // 验证密码
+                if (!validatePassword(password)) {
+                    showMessage('密码必须是8位字母和数字组合', 'error');
+                    return;
+                }
+                
+                // 确认密码
+                if (password !== confirmPassword) {
+                    showMessage('两次输入的密码不一致', 'error');
+                    return;
+                }
+                
+                const users = JSON.parse(localStorage.getItem(usersKey));
+                
+                // 检查用户是否存在
+                if (users.some(u => u.username === username)) {
+                    showMessage('用户名已存在', 'error');
+                    return;
+                }
+                
+                // 创建新用户
+                const newUser = {
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                    username: username,
+                    password: hashPassword(password),
+                    createdAt: new Date().toISOString(),
+                    lastLogin: null
+                };
+                
+                users.push(newUser);
+                localStorage.setItem(usersKey, JSON.stringify(users));
+                
+                // 自动登录
+                localStorage.setItem(currentUserKey, JSON.stringify({
+                    id: newUser.id,
+                    username: newUser.username,
+                    createdAt: newUser.createdAt
+                }));
+                
+                showMessage('注册成功！正在跳转...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

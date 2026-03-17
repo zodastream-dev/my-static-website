@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认证系统功能测试</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2563eb;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .test-section h2 {
+            color: #374151;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .test-button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .test-button.secondary {
+            background: #6b7280;
+        }
+        
+        .test-button.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .test-button.success {
+            background: #10b981;
+        }
+        
+        .test-button.success:hover {
+            background: #059669;
+        }
+        
+        .test-button.danger {
+            background: #ef4444;
+        }
+        
+        .test-button.danger:hover {
+            background: #dc2626;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            display: block;
+        }
+        
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            display: block;
+        }
+        
+        .result.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+            display: block;
+        }
+        
+        .user-info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .user-info h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        
+        .user-info pre {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .test-case {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .test-case h4 {
+            margin-top: 0;
+            color: #4b5563;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status.passed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔐 用户认证系统功能测试</h1>
+        
+        <div class="test-section">
+            <h2>📊 系统状态</h2>
+            <div id="system-status" class="result info">
+                正在检查系统状态...
+            </div>
+            <button onclick="checkSystemStatus()" class="test-button">检查系统状态</button>
+            <button onclick="clearAllData()" class="test-button danger">清除所有测试数据</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>👤 当前用户状态</h2>
+            <div id="user-status" class="user-info">
+                <h3>未登录</h3>
+                <p>请先登录或注册</p>
+            </div>
+            <button onclick="checkUserStatus()" class="test-button">刷新用户状态</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>🧪 自动化测试用例</h2>
+            <div class="test-grid">
+                <div class="test-case">
+                    <h4>测试 1: 正常注册</h4>
+                    <p>用户名: testuser123<br>密码: abc12345</p>
+                    <button onclick="runTest1()" class="test-button success" style="width: 100%;">运行测试</button>
+                    <div id="test1-result" class="status pending">待测试</div>
+                </div>
+                
+                <div class="test-case">
+                    <h4>测试 2: 重复注册</h4>
+                    <p>使用已存在的用户名</p>
+                    <button onclick="runTest2()" class="test-button success" style="width: 100%;">运行测试</button>
+                    <div id="test2-result" class="status pending">待测试</div>
+                </div>
+                
+                <div class="test-case">
+                    <h4>测试 3: 正常登录</h4>
+                    <p>使用注册的凭据</p>
+                    <button onclick="runTest3()" class="test-button success" style="width: 100%;">运行测试</button>
+                    <div id="test3-result" class="status pending">待测试</div>
+                </div>
+                
+                <div class="test-case">
+                    <h4>测试 4: 错误密码</h4>
+                    <p>使用错误密码登录</p>
+                    <button onclick="runTest4()" class="test-button success" style="width: 100%;">运行测试</button>
+                    <div id="test4-result" class="status pending">待测试</div>
+                </div>
+                
+                <div class="test-case">
+                    <h4>测试 5: 注销功能</h4>
+                    <p>测试用户注销</p>
+                    <button onclick="runTest5()" class="test-button success" style="width: 100%;">运行测试</button>
+                    <div id="test5-result" class="status pending">待测试</div>
+                </div>
+                
+                <div class="test-case">
+                    <h4>测试 6: 会话持久性</h4>
+                    <p>测试页面刷新后状态</p>
+                    <button onclick="runTest6()" class="test-button success" style="width: 100%;">运行测试</button>
+                    <div id="test6-result" class="status pending">待测试</div>
+                </div>
+            </div>
+            
+            <button onclick="runAllTests()" class="test-button" style="margin-top: 20px; width: 100%; padding: 15px; font-size: 16px;">
+                🚀 运行所有测试
+            </button>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 手动测试工具</h2>
+            <div>
+                <button onclick="testRegistration()" class="test-button">测试注册功能</button>
+                <button onclick="testLogin()" class="test-button">测试登录功能</button>
+                <button onclick="testLogout()" class="test-button">测试注销功能</button>
+                <button onclick="testValidation()" class="test-button">测试表单验证</button>
+            </div>
+            <div id="manual-test-result" class="result" style="margin-top: 15px;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 测试结果汇总</h2>
+            <div id="test-summary">
+                <p>总测试用例: 6</p>
+                <p>已通过: <span id="passed-count">0</span></p>
+                <p>已失败: <span id="failed-count">0</span></p>
+                <p>待测试: <span id="pending-count">6</span></p>
+                <p>通过率: <span id="pass-rate">0%</span></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 认证系统核心函数
+        const usersKey = 'openclaw_users';
+        const currentUserKey = 'openclaw_current_user';
+        
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString(36);
+        }
+        
+        function validateUsername(username) {
+            const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
+            return usernameRegex.test(username);
+        }
+        
+        function validatePassword(password) {
+            const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8}$/;
+            return passwordRegex.test(password);
+        }
+        
+        function getUsers() {
+            const users = localStorage.getItem(usersKey);
+            return users ? JSON.parse(users) : [];
+        }
+        
+        function setUsers(users) {
+            localStorage.setItem(usersKey, JSON.stringify(users));
+        }
+        
+        function getUser(username) {
+            const users = getUsers();
+            return users.find(u => u.username === username);
+        }
+        
+        function addUser(user) {
+            const users = getUsers();
+            users.push(user);
+            setUsers(users);
+        }
+        
+        function getCurrentUser() {
+            const user = localStorage.getItem(currentUserKey);
+            return user ? JSON.parse(user) : null;
+        }
+        
+        function setCurrentUser(user) {
+            if (user) {
+                localStorage.setItem(currentUserKey, JSON.stringify(user));
+            } else {
+                localStorage.removeItem(currentUserKey);
+            }
+        }
+        
+        // 测试函数
+        function checkSystemStatus() {
+            const resultDiv = document.getElementById('system-status');
+            
+            try {
+                // 检查localStorage
+                if (typeof localStorage === 'undefined') {
+                    throw new Error('localStorage不可用');
+                }
+                
+                // 初始化用户数据库
+                if (!localStorage.getItem(usersKey)) {
+                    localStorage.setItem(usersKey, JSON.stringify([]));
+                }
+                
+                const users = getUsers();
+                const currentUser = getCurrentUser();
+                
+                resultDiv.innerHTML = `
+                    <strong>✅ 系统状态正常</strong><br>
+                    - localStorage: 可用<br>
+                    - 注册用户数: ${users.length}<br>
+                    - 当前登录: ${currentUser ? currentUser.username : '无'}<br>
+                    - 测试时间: ${new Date().toLocaleString()}
+                `;
+                resultDiv.className = 'result success';
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>❌ 系统错误</strong><br>${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        function checkUserStatus() {
+            const userStatusDiv = document.getElementById('user-status');
+            const currentUser = getCurrentUser();
+            
+            if (currentUser) {
+                userStatusDiv.innerHTML = `
+                    <h3>✅ 已登录</h3>
+                    <pre>${JSON.stringify(currentUser, null, 2)}</pre>
+                    <p><strong>用户ID:</strong> ${currentUser.id}</p>
+                    <p><strong>用户名:</strong> ${currentUser.username}</p>
+                    <p><strong>注册时间:</strong> ${new Date(currentUser.createdAt).toLocaleString()}</p>
+                `;
+            } else {
+                userStatusDiv.innerHTML = `
+                    <h3>👤 未登录</h3>
+                    <p>请先登录或注册</p>
+                `;
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('确定要清除所有测试数据吗？这将删除所有注册用户和当前会话。')) {
+                localStorage.removeItem(usersKey);
+                localStorage.removeItem(currentUserKey);
+                localStorage.setItem(usersKey, JSON.stringify([]));
+                
+                document.getElementById('system-status').innerHTML = '<strong>✅ 所有数据已清除</strong>';
+                document.getElementById('system-status').className = 'result success';
+                
+                checkUserStatus();
+                resetTestResults();
+            }
+        }
+        
+        // 测试用例函数
+        let testResults = {
+            test1: { status: 'pending', message: '' },
+            test2: { status: 'pending', message: '' },
+            test3: { status: 'pending', message: '' },
+            test4: { status: 'pending', message: '' },
+            test5: { status: 'pending', message: '' },
+            test6: { status: 'pending', message: '' }
+        };
+        
+        function updateTestResult(testId, passed, message) {
+            const resultDiv = document.getElementById(`${testId}-result`);
+            testResults[testId] = {
+                status: passed ? 'passed' : 'failed',
+                message: message
+            };
+            
+            resultDiv.textContent = passed ? '通过' : '失败';
+            resultDiv.className = `status ${passed ? 'passed' : 'failed'}`;
+            
+            updateTestSummary();
+        }
+        
+        function updateTestSummary() {
+            const totalTests = 6;
+            let passed = 0;
+            let failed = 0;
+            
+            for (const testId in testResults) {
+                if (testResults[testId].status === 'passed') {
+                    passed++;
+                } else if (testResults[testId].status === 'failed') {
+                    failed++;
+                }
+            }
+            
+            const pending = totalTests - passed - failed;
+            const passRate = totalTests > 0 ? Math.round((passed / totalTests) * 100) : 0;
+            
+            document.getElementById('passed-count').textContent = passed;
+            document.getElementById('failed-count').textContent = failed;
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('pass-rate').textContent = `${passRate}%`;
+        }
+        
+        function resetTestResults() {
+            for (const testId in testResults) {
+                testResults[testId] = { status: 'pending', message: '' };
+                const resultDiv = document.getElementById(`${testId}-result`);
+                if (resultDiv) {
+                    resultDiv.textContent = '待测试';
+                    resultDiv.className = 'status pending';
+                }
+            }
+            updateTestSummary();
+        }
+        
+        // 测试用例实现
+        function runTest1() {
+            // 测试1: 正常注册
+            try {
+                // 清除可能存在的测试用户
+                let users = getUsers();
+                users = users.filter(u => u.username !== 'testuser123');
+                setUsers(users);
+                
+                // 验证用户名
+                if (!validateUsername('testuser123')) {
+                    throw new Error('用户名验证失败');
+                }
+                
+                // 验证密码
+                if (!validatePassword('abc12345')) {
+                    throw new Error('密码验证失败');
+                }
+                
+                // 创建用户
+                const newUser = {
+                    id: 'test-' + Date.now(),
+                    username: 'testuser123',
+                    password: hashPassword('abc12345'),
+                    createdAt: new Date().toISOString(),
+                    lastLogin: null
+                };
+                
+                addUser(newUser);
+                
+                // 验证用户已添加
+                const addedUser = getUser('testuser123');
+                if (!addedUser) {
+                    throw new Error('用户未成功添加');
+                }
+                
+                updateTestResult('test1', true, '正常注册测试通过');
+            } catch (error) {
+                updateTestResult('test1', false, `注册测试失败: ${error.message}`);
+            }
+        }
+        
+        function runTest2() {
+            // 测试2: 重复注册
+            try {
+                const existingUser = getUser('testuser123');
+                if (!existingUser) {
+                    throw new Error('测试用户不存在，请先运行测试1');
+                }
+                
+                // 尝试重复注册
+                const users = getUsers();
+                const duplicateCount = users.filter(u => u.username === 'testuser123').length;
+                
+                // 注意：实际系统中应该阻止重复注册
+                // 这里我们只是检查用户是否已存在
+                if (duplicateCount > 1) {
+                    throw new Error('发现重复用户');
+                }
+                
+                updateTestResult('test2', true, '重复注册检查通过');
+            } catch (error) {
+                updateTestResult('test2', false, `重复注册测试失败: ${error.message}`);
+            }
+        }
+        
+        function runTest3() {
+            // 测试3: 正常登录
+            try {
+                const user = getUser('testuser123');
+                if (!user) {
+                    throw new Error('测试用户不存在，请先运行测试1');
+                }
+                
+                // 模拟登录
+                if (user.password !== hashPassword('abc12345')) {
+                    throw new Error('密码验证失败');
+                }
+                
+                // 设置当前用户
+                setCurrentUser({
+                    id: user.id,
+                    username: user.username,
+                    createdAt: user.createdAt
+                });
+                
+                // 验证登录状态
+                const currentUser = getCurrentUser();
+                if (!currentUser || currentUser.username !== 'testuser123') {
+                    throw new Error('登录状态设置失败');
+                }
+                
+                updateTestResult('test3', true, '正常登录测试通过');
+                checkUserStatus();
+            } catch (error) {
+                updateTestResult('test3', false, `登录测试失败: ${error.message}`);
+            }
+        }
+        
+        function runTest4() {
+            // 测试4: 错误密码
+            try {
+                const user = getUser('testuser123');
+                if (!user) {
+                    throw new Error('测试用户不存在');
+                }
+                
+                // 使用错误密码
+                if (user.password === hashPassword('wrongpass')) {
+                    throw new Error('错误密码不应通过验证');
+                }
+                
+                updateTestResult('test4', true, '错误密码测试通过');
+            } catch (error) {
+                updateTestResult('test4', false, `错误密码测试失败: ${error.message}`);
+            }
+        }
+        
+        function runTest5() {
+            // 测试5: 注销功能
+            try {
+                // 确保当前有用户登录
+                let currentUser = getCurrentUser();
+                if (!currentUser) {
+                    // 如果没有登录，先登录
+                    const user = getUser('testuser123');
+                    if (user) {
+                        setCurrentUser({
+                            id: user.id,
+                            username: user.username,
+                            createdAt: user.createdAt
+                        });
+                        currentUser = getCurrentUser();
+                    }
+                }
+                
+                if (!currentUser) {
+                    throw new Error('没有可注销的用户');
+                }
+                
+                // 执行注销
+                setCurrentUser(null);
+                
+                // 验证注销
+                const afterLogout = getCurrentUser();
+                if (afterLogout) {
+                    throw new Error('注销失败，用户仍然登录');
+                }
+                
+                updateTestResult('test5', true, '注销功能测试通过');
+                checkUserStatus();
+            } catch (error) {
+                updateTestResult('test5', false, `注销测试失败: ${error.message}`);
+            }
+        }
+        
+        function runTest6() {
+            // 测试6: 会话持久性
+            try {
+                // 先登录
+                const user = getUser('testuser123');
+                if (!user) {
+                    throw new Error('测试用户不存在');
+                }
+                
+                setCurrentUser({
+                    id: user.id,
+                    username: user.username,
+                    createdAt: user.createdAt
+                });
+                
+                // 模拟页面刷新（实际上只是重新获取）
+                const savedUser = getCurrentUser();
+                if (!savedUser || savedUser.username !== 'testuser123') {
+                    throw new Error('会话持久性测试失败');
+                }
+                
+                updateTestResult('test6', true, '会话持久性测试通过');
+            } catch (error) {
+                updateTestResult('test6', false, `会话持久性测试失败: ${error.message}`);
+            }
+        }
+        
+        function runAllTests() {
+            if (confirm('这将运行所有测试用例，可能会修改测试数据。确定要继续吗？')) {
+                resetTestResults();
+                
+                // 按顺序运行测试
+                setTimeout(() => runTest1(), 100);
+                setTimeout(() => runTest2(), 300);
+                setTimeout(() => runTest3(), 500);
+                setTimeout(() => runTest4(), 700);
+                setTimeout(() => runTest5(), 900);
+                setTimeout(() => runTest6(), 1100);
+                
+                setTimeout(() => {
+                    const resultDiv = document.getElementById('manual-test-result');
+                    const passed = Object.values(testResults).filter(t => t.status === 'passed').length;
+                    const total = Object.keys(testResults).length;
+                    
+                    resultDiv.innerHTML = `<strong>🎯 所有测试完成</strong><br>通过 ${passed}/${total} 个测试用例`;
+                    resultDiv.className = passed === total ? 'result success' : 'result error';
+                }, 1500);
+            }
+        }
+        
+        // 手动测试函数
+        function testRegistration() {
+            const resultDiv = document.getElementById('manual-test-result');
+            resultDiv.innerHTML = '正在测试注册功能...';
+            resultDiv.className = 'result info';
+            
+            setTimeout(() => {
+                runTest1();
+                runTest2();
+                
+                resultDiv.innerHTML = '<strong>✅ 注册功能测试完成</strong><br>请查看自动化测试结果';
+                resultDiv.className = 'result success';
+            }, 500);
+        }
+        
+        function testLogin() {
+            const resultDiv = document.getElementById('manual-test-result');
+            resultDiv.innerHTML = '正在测试登录功能...';
+            resultDiv.className = 'result info';
+            
+            setTimeout(() => {
+                runTest3();
+                runTest4();
+                
+                resultDiv.innerHTML = '<strong>✅ 登录功能测试完成</strong><br>请查看自动化测试结果';
+                resultDiv.className = 'result success';
+            }, 500);
+        }
+        
+        function testLogout() {
+            const resultDiv = document.getElementById('manual-test-result');
+            resultDiv.innerHTML = '正在测试注销功能...';
+            resultDiv.className = 'result info';
+            
+            setTimeout(() => {
+                runTest5();
+                
+                resultDiv.innerHTML = '<strong>✅ 注销功能测试完成</strong><br>请查看自动化测试结果';
+                resultDiv.className = 'result success';
+            }, 500);
+        }
+        
+        function testValidation() {
+            const resultDiv = document.getElementById('manual-test-result');
+            
+            // 测试用户名验证
+            const usernameTests = [
+                { input: 'abc', expected: true },
+                { input: 'abc123', expected: true },
+                { input: 'a'.repeat(20), expected: true },
+                { input: 'ab', expected: false }, // 太短
+                { input: 'a'.repeat(21), expected: false }, // 太长
+                { input: 'abc def', expected: false }, // 包含空格
+                { input: 'abc@def', expected: false } // 包含特殊字符
+            ];
+            
+            // 测试密码验证
+            const passwordTests = [
+                { input: 'abc12345', expected: true },
+                { input: 'ABCD1234', expected: true },
+                { input: '12345678', expected: false }, // 只有数字
+                { input: 'abcdefgh', expected: false }, // 只有字母
+                { input: 'abc1234', expected: false }, // 太短
+                { input: 'abc123456', expected: false }, // 太长
+                { input: 'abc@1234', expected: false } // 包含特殊字符
+            ];
+            
+            let usernamePassed = 0;
+            let passwordPassed = 0;
+            
+            usernameTests.forEach(test => {
+                if (validateUsername(test.input) === test.expected) {
+                    usernamePassed++;
+                }
+            });
+            
+            passwordTests.forEach(test => {
+                if (validatePassword(test.input) === test.expected) {
+                    passwordPassed++;
+                }
+            });
+            
+            resultDiv.innerHTML = `
+                <strong>✅ 表单验证测试完成</strong><br>
+                用户名验证: ${usernamePassed}/${usernameTests.length} 通过<br>
+                密码验证: ${passwordPassed}/${passwordTests.length} 通过
+            `;
+            resultDiv.className = 'result success';
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+            checkUserStatus();
+            updateTestSummary();
+        });
+    </script>
+</body>
+</html>

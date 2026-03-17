@@ -7,6 +7,7 @@
     <meta name="description" content="这是一个从设计到部署全流程实践的静态网站项目">
     <meta name="keywords" content="静态网站, GitHub Pages, HTML, CSS, JavaScript, 部署">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -273,7 +274,87 @@
         </div>
     </footer>
 
+    <!-- 认证模态框 -->
+    <div id="auth-modal" class="auth-modal">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2>用户认证</h2>
+                <button id="close-auth-modal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="login-tab">登录</button>
+                <button class="auth-tab" id="register-tab">注册</button>
+            </div>
+            
+            <div class="auth-content">
+                <div id="auth-message" class="message"></div>
+                
+                <form id="login-form" class="auth-form active">
+                    <div class="form-error error-message"></div>
+                    
+                    <div class="form-group">
+                        <label for="login-username">用户名</label>
+                        <input type="text" id="login-username" class="form-control" placeholder="请输入用户名" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">密码</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="请输入8位密码" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">登录</button>
+                </form>
+                
+                <form id="register-form" class="auth-form">
+                    <div class="form-error error-message"></div>
+                    
+                    <div class="form-group">
+                        <label for="register-username">用户名</label>
+                        <input type="text" id="register-username" class="form-control" placeholder="3-20位字母和数字" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">密码</label>
+                        <input type="password" id="register-password" class="form-control" placeholder="8位字母和数字组合" required>
+                        
+                        <!-- 密码强度指示器 -->
+                        <div class="password-strength">
+                            <div id="password-strength-bar" class="strength-bar"></div>
+                        </div>
+                        <div id="password-strength-text" class="strength-text"></div>
+                        
+                        <!-- 密码要求 -->
+                        <div class="password-requirements">
+                            <div class="requirement invalid">
+                                <i class="fas fa-circle"></i> 至少包含一个字母
+                            </div>
+                            <div class="requirement invalid">
+                                <i class="fas fa-circle"></i> 至少包含一个数字
+                            </div>
+                            <div class="requirement invalid">
+                                <i class="fas fa-circle"></i> 必须是8位长度
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">确认密码</label>
+                        <input type="password" id="register-confirm-password" class="form-control" placeholder="再次输入密码" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">注册</button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>点击"注册"即表示同意我们的服务条款</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript文件 -->
     <script src="js/script.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>
