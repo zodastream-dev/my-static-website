@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认证系统调试页面</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .debug-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .test-button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 5px;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .result.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .log {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .log-item {
+            margin-bottom: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .log-item.error {
+            color: #fca5a5;
+        }
+        
+        .log-item.success {
+            color: #86efac;
+        }
+        
+        .log-item.info {
+            color: #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔧 认证系统调试工具</h1>
+        
+        <div class="section">
+            <h2>1. 检查JavaScript加载</h2>
+            <button onclick="checkJavascript()" class="test-button">检查JS加载</button>
+            <div id="js-check" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>2. 检查按钮绑定</h2>
+            <button onclick="checkButtons()" class="test-button">检查按钮绑定</button>
+            <div id="button-check" class="result"></div>
+            
+            <h3>测试按钮：</h3>
+            <button id="test-login-btn" class="test-button">测试登录按钮</button>
+            <button id="test-register-btn" class="test-button">测试注册按钮</button>
+        </div>
+        
+        <div class="section">
+            <h2>3. 检查模态框</h2>
+            <button onclick="checkModal()" class="test-button">检查模态框</button>
+            <div id="modal-check" class="result"></div>
+            
+            <h3>测试模态框显示：</h3>
+            <button onclick="showTestModal()" class="test-button">显示测试模态框</button>
+        </div>
+        
+        <div class="section">
+            <h2>4. 检查事件监听器</h2>
+            <button onclick="checkEventListeners()" class="test-button">检查事件监听</button>
+            <div id="event-check" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>5. 控制台日志</h2>
+            <div id="console-log" class="log">
+                <div class="log-item info">等待日志...</div>
+            </div>
+            <button onclick="clearLog()" class="test-button">清除日志</button>
+        </div>
+        
+        <div class="section">
+            <h2>6. 快速修复</h2>
+            <button onclick="applyFix()" class="test-button" style="background: #ef4444; color: white;">应用修复</button>
+            <div id="fix-result" class="result"></div>
+        </div>
+    </div>
+    
+    <!-- 测试模态框 -->
+    <div id="test-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px;">
+            <h2>测试模态框</h2>
+            <p>如果这个模态框能显示，说明模态框功能正常。</p>
+            <button onclick="document.getElementById('test-modal').style.display = 'none'" class="test-button">关闭</button>
+        </div>
+    </div>
+    
+    <script>
+        // 日志系统
+        const logContainer = document.getElementById('console-log');
+        
+        function log(message, type = 'info') {
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${type}`;
+            logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logItem);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function clearLog() {
+            logContainer.innerHTML = '<div class="log-item info">日志已清除</div>';
+        }
+        
+        // 检查JavaScript加载
+        function checkJavascript() {
+            const resultDiv = document.getElementById('js-check');
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+            
+            try {
+                // 检查auth.js是否加载
+                const scripts = document.getElementsByTagName('script');
+                let authJsLoaded = false;
+                
+                for (let script of scripts) {
+                    if (script.src && script.src.includes('auth.js')) {
+                        authJsLoaded = true;
+                        break;
+                    }
+                }
+                
+                if (authJsLoaded) {
+                    resultDiv.innerHTML = '✅ auth.js 已加载';
+                    resultDiv.className = 'result success show';
+                    log('auth.js 已加载', 'success');
+                } else {
+                    resultDiv.innerHTML = '❌ auth.js 未加载';
+                    resultDiv.className = 'result error show';
+                    log('auth.js 未加载', 'error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 检查失败: ${error.message}`;
+                resultDiv.className = 'result error show';
+                log(`JS检查失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 检查按钮绑定
+        function checkButtons() {
+            const resultDiv = document.getElementById('button-check');
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+            
+            try {
+                // 检查主页面按钮
+                const loginBtn = document.getElementById('login-btn');
+                const registerBtn = document.getElementById('register-btn');
+                
+                let result = '';
+                
+                if (loginBtn) {
+                    result += '✅ 登录按钮存在<br>';
+                    log('登录按钮存在', 'success');
+                    
+                    // 测试点击事件
+                    const testLoginBtn = document.getElementById('test-login-btn');
+                    if (testLoginBtn) {
+                        testLoginBtn.onclick = function() {
+                            log('测试登录按钮被点击');
+                            if (typeof window.authSystem !== 'undefined') {
+                                window.authSystem.showModal('login');
+                                log('调用 authSystem.showModal("login")', 'success');
+                            } else {
+                                log('authSystem 未定义', 'error');
+                            }
+                        };
+                    }
+                } else {
+                    result += '❌ 登录按钮不存在<br>';
+                    log('登录按钮不存在', 'error');
+                }
+                
+                if (registerBtn) {
+                    result += '✅ 注册按钮存在<br>';
+                    log('注册按钮存在', 'success');
+                    
+                    // 测试点击事件
+                    const testRegisterBtn = document.getElementById('test-register-btn');
+                    if (testRegisterBtn) {
+                        testRegisterBtn.onclick = function() {
+                            log('测试注册按钮被点击');
+                            if (typeof window.authSystem !== 'undefined') {
+                                window.authSystem.showModal('register');
+                                log('调用 authSystem.showModal("register")', 'success');
+                            } else {
+                                log('authSystem 未定义', 'error');
+                            }
+                        };
+                    }
+                } else {
+                    result += '❌ 注册按钮不存在<br>';
+                    log('注册按钮不存在', 'error');
+                }
+                
+                resultDiv.innerHTML = result;
+                resultDiv.className = 'result show';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 检查失败: ${error.message}`;
+                resultDiv.className = 'result error show';
+                log(`按钮检查失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 检查模态框
+        function checkModal() {
+            const resultDiv = document.getElementById('modal-check');
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+            
+            try {
+                const modal = document.getElementById('auth-modal');
+                
+                if (modal) {
+                    resultDiv.innerHTML = '✅ 认证模态框存在<br>';
+                    log('认证模态框存在', 'success');
+                    
+                    // 检查CSS类
+                    if (modal.classList.contains('auth-modal')) {
+                        resultDiv.innerHTML += '✅ 模态框CSS类正确<br>';
+                        log('模态框CSS类正确', 'success');
+                    } else {
+                        resultDiv.innerHTML += '❌ 模态框CSS类错误<br>';
+                        log('模态框CSS类错误', 'error');
+                    }
+                    
+                    // 检查显示状态
+                    const isVisible = modal.classList.contains('active') || 
+                                     modal.style.display === 'flex' || 
+                                     modal.style.display === '';
+                    
+                    resultDiv.innerHTML += `模态框显示状态: ${isVisible ? '显示' : '隐藏'}<br>`;
+                    log(`模态框显示状态: ${isVisible ? '显示' : '隐藏'}`);
+                    
+                } else {
+                    resultDiv.innerHTML = '❌ 认证模态框不存在';
+                    resultDiv.className = 'result error show';
+                    log('认证模态框不存在', 'error');
+                }
+                
+                resultDiv.className = 'result show';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 检查失败: ${error.message}`;
+                resultDiv.className = 'result error show';
+                log(`模态框检查失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 检查事件监听器
+        function checkEventListeners() {
+            const resultDiv = document.getElementById('event-check');
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+            
+            try {
+                // 获取事件监听器（注意：这只能获取通过addEventListener添加的）
+                const loginBtn = document.getElementById('login-btn');
+                const registerBtn = document.getElementById('register-btn');
+                
+                let result = '';
+                
+                if (loginBtn) {
+                    // 尝试触发点击
+                    const clickEvent = new MouseEvent('click', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    
+                    // 保存原始onclick
+                    const originalOnClick = loginBtn.onclick;
+                    
+                    let clicked = false;
+                    loginBtn.onclick = function() {
+                        clicked = true;
+                        if (originalOnClick) originalOnClick.call(this);
+                    };
+                    
+                    loginBtn.dispatchEvent(clickEvent);
+                    
+                    setTimeout(() => {
+                        if (clicked) {
+                            result += '✅ 登录按钮点击事件有效<br>';
+                            log('登录按钮点击事件有效', 'success');
+                        } else {
+                            result += '❌ 登录按钮点击事件无效<br>';
+                            log('登录按钮点击事件无效', 'error');
+                        }
+                        
+                        // 恢复原始onclick
+                        loginBtn.onclick = originalOnClick;
+                        
+                        resultDiv.innerHTML = result;
+                        resultDiv.className = 'result show';
+                    }, 100);
+                }
+                
+                if (registerBtn) {
+                    // 类似检查注册按钮
+                    result += '注册按钮检查...<br>';
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 检查失败: ${error.message}`;
+                resultDiv.className = 'result error show';
+                log(`事件检查失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 显示测试模态框
+        function showTestModal() {
+            document.getElementById('test-modal').style.display = 'flex';
+            log('显示测试模态框', 'info');
+        }
+        
+        // 应用修复
+        function applyFix() {
+            const resultDiv = document.getElementById('fix-result');
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+            
+            try {
+                log('开始应用修复...', 'info');
+                
+                // 修复1: 确保authSystem全局可用
+                if (typeof window.authSystem === 'undefined') {
+                    log('重新加载auth.js...', 'info');
+                    
+                    // 创建新的script标签
+                    const script = document.createElement('script');
+                    script.src = 'js/auth.js';
+                    script.onload = function() {
+                        log('auth.js 重新加载成功', 'success');
+                        checkJavascript();
+                        checkButtons();
+                    };
+                    script.onerror = function() {
+                        log('auth.js 重新加载失败', 'error');
+                    };
+                    
+                    document.head.appendChild(script);
+                }
+                
+                // 修复2: 手动绑定按钮事件
+                const loginBtn = document.getElementById('login-btn');
+                const registerBtn = document.getElementById('register-btn');
+                
+                if (loginBtn) {
+                    loginBtn.onclick = function() {
+                        const modal = document.getElementById('auth-modal');
+                        if (modal) {
+                            modal.classList.add('active');
+                            log('手动显示登录模态框', 'success');
+                        }
+                    };
+                    log('手动绑定登录按钮', 'success');
+                }
+                
+                if (registerBtn) {
+                    registerBtn.onclick = function() {
+                        const modal = document.getElementById('auth-modal');
+                        if (modal) {
+                            modal.classList.add('active');
+                            // 切换到注册标签
+                            const registerTab = document.getElementById('register-tab');
+                            const loginTab = document.getElementById('login-tab');
+                            const registerForm = document.getElementById('register-form');
+                            const loginForm = document.getElementById('login-form');
+                            
+                            if (registerTab && loginTab && registerForm && loginForm) {
+                                loginTab.classList.remove('active');
+                                registerTab.classList.add('active');
+                                loginForm.classList.remove('active');
+                                registerForm.classList.add('active');
+                            }
+                            log('手动显示注册模态框', 'success');
+                        }
+                    };
+                    log('手动绑定注册按钮', 'success');
+                }
+                
+                // 修复3: 确保模态框关闭按钮工作
+                const closeBtn = document.getElementById('close-auth-modal');
+                if (closeBtn) {
+                    closeBtn.onclick = function() {
+                        const modal = document.getElementById('auth-modal');
+                        if (modal) {
+                            modal.classList.remove('active');
+                            log('手动关闭模态框', 'info');
+                        }
+                    };
+                    log('绑定关闭按钮', 'success');
+                }
+                
+                resultDiv.innerHTML = '✅ 修复已应用<br>请重新测试登录/注册按钮';
+                resultDiv.className = 'result success show';
+                log('所有修复已应用', 'success');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `❌ 修复失败: ${error.message}`;
+                resultDiv.className = 'result error show';
+                log(`修复失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载时运行基本检查
+        window.onload = function() {
+            log('调试页面已加载', 'info');
+            setTimeout(() => {
+                checkJavascript();
+                checkButtons();
+                checkModal();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

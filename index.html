@@ -27,6 +27,29 @@
                 <li><a href="#deploy"><i class="fas fa-cloud-upload-alt"></i> 部署</a></li>
                 <li><a href="#contact"><i class="fas fa-envelope"></i> 联系</a></li>
             </ul>
+            
+            <!-- 认证按钮容器 -->
+            <div class="auth-buttons" id="auth-container">
+                <button id="login-btn" class="btn-auth-small btn-login">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                <button id="register-btn" class="btn-auth-small btn-register">
+                    <i class="fas fa-user-plus"></i> 注册
+                </button>
+            </div>
+            
+            <!-- 用户状态容器 -->
+            <div class="user-status-display" id="user-status" style="display: none;">
+                <div class="user-avatar-small" id="user-avatar">U</div>
+                <div class="user-info-small">
+                    <span class="user-name-small" id="user-name">用户</span>
+                    <span class="user-status-small">已登录</span>
+                </div>
+                <button id="logout-btn" class="btn-logout-small">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
             <button class="menu-toggle">
                 <i class="fas fa-bars"></i>
             </button>
@@ -355,6 +378,6 @@
 
     <!-- JavaScript文件 -->
     <script src="js/script.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="js/auth-fixed.js"></script>
 </body>
 </html>
