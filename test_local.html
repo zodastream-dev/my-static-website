@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>本地测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #ddd;
+        }
+        .passed {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        .failed {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>静态网站本地测试</h1>
+    <p>测试时间: <span id="test-time"></span></p>
+    
+    <div id="test-results">
+        <h2>测试结果:</h2>
+        <div class="test-result" id="test-html">
+            <h3>1. HTML文件测试</h3>
+            <p>状态: <span class="status">测试中...</span></p>
+        </div>
+        
+        <div class="test-result" id="test-css">
+            <h3>2. CSS文件测试</h3>
+            <p>状态: <span class="status">测试中...</span></p>
+        </div>
+        
+        <div class="test-result" id="test-js">
+            <h3>3. JavaScript文件测试</h3>
+            <p>状态: <span class="status">测试中...</span></p>
+        </div>
+        
+        <div class="test-result" id="test-structure">
+            <h3>4. 项目结构测试</h3>
+            <p>状态: <span class="status">测试中...</span></p>
+        </div>
+    </div>
+    
+    <div id="next-steps">
+        <h2>下一步：部署到GitHub Pages</h2>
+        <ol>
+            <li>创建GitHub仓库</li>
+            <li>推送代码到GitHub</li>
+            <li>启用GitHub Pages</li>
+            <li>访问在线网站</li>
+        </ol>
+        
+        <p><a href="index.html">点击这里查看实际网站</a></p>
+    </div>
+    
+    <script>
+        // 设置测试时间
+        document.getElementById('test-time').textContent = new Date().toLocaleString();
+        
+        // 测试函数
+        function testHTML() {
+            const element = document.getElementById('test-html');
+            try {
+                // 检查index.html是否存在
+                fetch('index.html')
+                    .then(response => {
+                        if (response.ok) {
+                            element.classList.add('passed');
+                            element.querySelector('.status').innerHTML = '<span class="success">✅ 通过</span>';
+                            element.querySelector('.status').innerHTML += '<br>文件大小: ' + (response.headers.get('content-length') / 1024).toFixed(2) + ' KB';
+                        } else {
+                            throw new Error('文件不存在');
+                        }
+                    })
+                    .catch(error => {
+                        element.classList.add('failed');
+                        element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+                    });
+            } catch (error) {
+                element.classList.add('failed');
+                element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+            }
+        }
+        
+        function testCSS() {
+            const element = document.getElementById('test-css');
+            try {
+                fetch('css/style.css')
+                    .then(response => {
+                        if (response.ok) {
+                            element.classList.add('passed');
+                            element.querySelector('.status').innerHTML = '<span class="success">✅ 通过</span>';
+                            element.querySelector('.status').innerHTML += '<br>文件大小: ' + (response.headers.get('content-length') / 1024).toFixed(2) + ' KB';
+                        } else {
+                            throw new Error('文件不存在');
+                        }
+                    })
+                    .catch(error => {
+                        element.classList.add('failed');
+                        element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+                    });
+            } catch (error) {
+                element.classList.add('failed');
+                element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+            }
+        }
+        
+        function testJS() {
+            const element = document.getElementById('test-js');
+            try {
+                fetch('js/script.js')
+                    .then(response => {
+                        if (response.ok) {
+                            element.classList.add('passed');
+                            element.querySelector('.status').innerHTML = '<span class="success">✅ 通过</span>';
+                            element.querySelector('.status').innerHTML += '<br>文件大小: ' + (response.headers.get('content-length') / 1024).toFixed(2) + ' KB';
+                        } else {
+                            throw new Error('文件不存在');
+                        }
+                    })
+                    .catch(error => {
+                        element.classList.add('failed');
+                        element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+                    });
+            } catch (error) {
+                element.classList.add('failed');
+                element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+            }
+        }
+        
+        function testStructure() {
+            const element = document.getElementById('test-structure');
+            try {
+                // 检查基本文件结构
+                const requiredFiles = ['index.html', 'css/style.css', 'js/script.js', 'README.md'];
+                let missingFiles = [];
+                
+                Promise.all(requiredFiles.map(file => 
+                    fetch(file).then(response => {
+                        if (!response.ok) missingFiles.push(file);
+                    }).catch(() => missingFiles.push(file))
+                )).then(() => {
+                    if (missingFiles.length === 0) {
+                        element.classList.add('passed');
+                        element.querySelector('.status').innerHTML = '<span class="success">✅ 通过</span>';
+                        element.querySelector('.status').innerHTML += '<br>所有必需文件都存在';
+                    } else {
+                        throw new Error('缺少文件: ' + missingFiles.join(', '));
+                    }
+                });
+            } catch (error) {
+                element.classList.add('failed');
+                element.querySelector('.status').innerHTML = '<span class="error">❌ 失败: ' + error.message + '</span>';
+            }
+        }
+        
+        // 运行所有测试
+        setTimeout(testHTML, 500);
+        setTimeout(testCSS, 1000);
+        setTimeout(testJS, 1500);
+        setTimeout(testStructure, 2000);
+    </script>
+</body>
+</html>

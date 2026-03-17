@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的第一个静态网站 | 全流程实践</title>
+    <meta name="description" content="这是一个从设计到部署全流程实践的静态网站项目">
+    <meta name="keywords" content="静态网站, GitHub Pages, HTML, CSS, JavaScript, 部署">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo">
+                <i class="fas fa-rocket"></i>
+                <span>StaticSite</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home"><i class="fas fa-home"></i> 首页</a></li>
+                <li><a href="#about"><i class="fas fa-info-circle"></i> 关于</a></li>
+                <li><a href="#features"><i class="fas fa-star"></i> 特性</a></li>
+                <li><a href="#deploy"><i class="fas fa-cloud-upload-alt"></i> 部署</a></li>
+                <li><a href="#contact"><i class="fas fa-envelope"></i> 联系</a></li>
+            </ul>
+            <button class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 首页区域 -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="highlight">从零到一</span> 构建静态网站
+                </h1>
+                <p class="hero-subtitle">
+                    这是一个完整的实践项目，包含设计、开发、部署全流程。
+                    使用现代HTML5、CSS3和JavaScript技术。
+                </p>
+                <div class="hero-buttons">
+                    <a href="#about" class="btn btn-primary">
+                        <i class="fas fa-play-circle"></i> 开始探索
+                    </a>
+                    <a href="#deploy" class="btn btn-secondary">
+                        <i class="fas fa-code"></i> 查看部署
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="code-preview">
+                    <pre><code class="html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;我的网站&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello World!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+                    </code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于区域 -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">关于这个项目</h2>
+            <p class="section-subtitle">
+                这是一个学习全流程网站开发的实践项目
+            </p>
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>现代技术栈</h3>
+                    <p>使用HTML5、CSS3、JavaScript等现代Web技术，确保网站性能和兼容性。</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>响应式设计</h3>
+                    <p>自适应各种设备屏幕，从手机到桌面电脑都能完美显示。</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>快速部署</h3>
+                    <p>通过GitHub Pages实现一键部署，无需复杂服务器配置。</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>安全可靠</h3>
+                    <p>自动SSL证书，确保数据传输安全，提升用户信任度。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特性区域 -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">项目特性</h2>
+            <div class="features-content">
+                <div class="features-list">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>纯静态HTML/CSS/JS</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>响应式布局设计</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>现代化UI界面</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>GitHub Pages部署</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>SEO友好</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>性能优化</span>
+                    </div>
+                </div>
+                <div class="features-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="visitor-count">0</div>
+                        <div class="stat-label">访问次数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="uptime-days">0</div>
+                        <div class="stat-label">运行天数</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 部署区域 -->
+    <section id="deploy" class="deploy">
+        <div class="container">
+            <h2 class="section-title">部署流程</h2>
+            <div class="deploy-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>创建GitHub仓库</h3>
+                    <p>在GitHub上创建新的仓库，用于存放网站代码。</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>推送代码</h3>
+                    <p>将本地代码推送到GitHub仓库。</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>启用GitHub Pages</h3>
+                    <p>在仓库设置中启用GitHub Pages功能。</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>访问网站</h3>
+                    <p>通过 <code>username.github.io/repo-name</code> 访问你的网站。</p>
+                </div>
+            </div>
+            <div class="deploy-info">
+                <h3>部署状态</h3>
+                <div class="status-indicator">
+                    <span class="status-dot active"></span>
+                    <span>网站已部署到 GitHub Pages</span>
+                </div>
+                <div class="deploy-links">
+                    <a href="#" class="deploy-link" id="live-site-link">
+                        <i class="fas fa-external-link-alt"></i> 访问在线网站
+                    </a>
+                    <a href="#" class="deploy-link" id="github-repo-link">
+                        <i class="fab fa-github"></i> 查看GitHub仓库
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系区域 -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">联系信息</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <h4>项目负责人</h4>
+                            <p>Jun Lu</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>邮箱</h4>
+                            <p>junlu@zodastream.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div>
+                            <h4>项目日期</h4>
+                            <p>2026年3月</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>发送消息</h3>
+                    <form id="message-form">
+                        <div class="form-group">
+                            <input type="text" placeholder="你的姓名" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="邮箱地址" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="你的消息..." rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> 发送消息
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-rocket"></i>
+                    <span>StaticSite</span>
+                </div>
+                <p class="footer-description">
+                    这是一个从设计到部署全流程实践的静态网站项目。
+                    使用现代Web技术，部署到GitHub Pages。
+                </p>
+                <div class="footer-links">
+                    <a href="#home"><i class="fas fa-home"></i> 首页</a>
+                    <a href="#about"><i class="fas fa-info-circle"></i> 关于</a>
+                    <a href="#deploy"><i class="fas fa-cloud-upload-alt"></i> 部署</a>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 我的静态网站项目. 保留所有权利.</p>
+                    <p>最后更新: <span id="last-update">2026-03-18</span></p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript文件 -->
+    <script src="js/script.js"></script>
+</body>
+</html>
