@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业工商信息查询 | openclaw.yookeer.com</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .company-search-container {
+            max-width: 1000px;
+            margin: 100px auto 50px;
+            padding: 0 20px;
+        }
+        
+        .search-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .search-header h1 {
+            font-size: 2.5rem;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        
+        .search-header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .search-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+        }
+        
+        .data-sources {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .source-btn {
+            padding: 10px 20px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .source-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        
+        .source-btn:hover:not(.active) {
+            background: #e5e7eb;
+        }
+        
+        .result-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        
+        .company-name {
+            font-size: 1.8rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .company-status {
+            padding: 6px 12px;
+            background: #10b981;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .company-status.closed {
+            background: #ef4444;
+        }
+        
+        .company-status.revoked {
+            background: #f59e0b;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .info-card h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-item {
+            margin-bottom: 12px;
+            display: flex;
+        }
+        
+        .info-label {
+            width: 100px;
+            color: #6b7280;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6b7280;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #fecaca;
+        }
+        
+        .api-note {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid #fde68a;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .company-search-container {
+                margin-top: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏（与主站一致） -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-rocket"></i>
+                <span>OpenClaw</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html"><i class="fas fa-home"></i> 首页</a></li>
+                <li><a href="company-search.html" class="active"><i class="fas fa-building"></i> 企业查询</a></li>
+                <li><a href="test-auth.html"><i class="fas fa-vial"></i> 功能测试</a></li>
+                <li><a href="debug-auth.html"><i class="fas fa-bug"></i> 调试工具</a></li>
+            </ul>
+            
+            <!-- 认证按钮 -->
+            <div class="auth-buttons" id="auth-container">
+                <button id="login-btn" class="btn-auth-small btn-login">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                <button id="register-btn" class="btn-auth-small btn-register">
+                    <i class="fas fa-user-plus"></i> 注册
+                </button>
+            </div>
+            
+            <!-- 用户状态 -->
+            <div class="user-status-display" id="user-status" style="display: none;">
+                <div class="user-avatar-small" id="user-avatar">U</div>
+                <div class="user-info-small">
+                    <span class="user-name-small" id="user-name">用户</span>
+                    <span class="user-status-small">已登录</span>
+                </div>
+                <button id="logout-btn" class="btn-logout-small">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
+            <button class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 企业查询主内容 -->
+    <div class="company-search-container">
+        <div class="search-header">
+            <h1><i class="fas fa-search"></i> 企业工商信息查询</h1>
+            <p>查询企业最新工商登记信息，包括基本信息、股东信息、经营范围等</p>
+        </div>
+        
+        <div class="search-box">
+            <form id="company-search-form" class="search-form">
+                <input type="text" 
+                       id="company-input" 
+                       class="search-input" 
+                       placeholder="请输入企业名称或统一社会信用代码" 
+                       required>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> 查询企业
+                </button>
+            </form>
+            
+            <div class="data-sources">
+                <div class="source-btn active" data-source="mock">演示数据</div>
+                <div class="source-btn" data-source="tianyancha">天眼查API</div>
+                <div class="source-btn" data-source="qichacha">企查查API</div>
+                <div class="source-btn" data-source="aiqicha">爱企查API</div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>正在查询企业信息，请稍候...</p>
+        </div>
+        
+        <div id="result-container" class="result-container">
+            <div class="result-header">
+                <h2 class="company-name" id="result-company-name">阿里巴巴(中国)有限公司</h2>
+                <span class="company-status" id="result-status">存续</span>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-id-card"></i> 基本信息</h3>
+                    <div class="info-item">
+                        <div class="info-label">统一信用代码</div>
+                        <div class="info-value" id="info-credit-code">91330100799655058B</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">法定代表人</div>
+                        <div class="info-value" id="info-legal-person">张勇</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">注册资本</div>
+                        <div class="info-value" id="info-reg-capital">100000万人民币</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">成立日期</div>
+                        <div class="info-value" id="info-establish-date">2007-03-26</div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-map-marker-alt"></i> 注册信息</h3>
+                    <div class="info-item">
+                        <div class="info-label">企业类型</div>
+                        <div class="info-value" id="info-company-type">有限责任公司(台港澳法人独资)</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">行业</div>
+                        <div class="info-value" id="info-industry">互联网和相关服务</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">注册地址</div>
+                        <div class="info-value" id="info-address">浙江省杭州市余杭区五常街道文一西路969号</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">核准日期</div>
+                        <div class="info-value" id="info-approve-date">2023-05-15</div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-chart-line"></i> 经营信息</h3>
+                    <div class="info-item">
+                        <div class="info-label">经营范围</div>
+                        <div class="info-value" id="info-business-scope">详见详情</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">登记机关</div>
+                        <div class="info-value" id="info-reg-office">浙江省市场监督管理局</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">营业期限</div>
+                        <div class="info-value" id="info-business-term">2007-03-26 至 长期</div>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-users"></i> 股东信息</h3>
+                    <div class="info-item">
+                        <div class="info-label">主要股东</div>
+                        <div class="info-value" id="info-shareholders">Taobao China Holding Limited</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">股东类型</div>
+                        <div class="info-value" id="info-shareholder-type">境外法人</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="api-note">
+                <strong><i class="fas fa-info-circle"></i> 使用说明：</strong><br>
+                当前显示的是演示数据。要获取真实企业信息，您需要：
+                1. 申请天眼查/企查查API密钥
+                2. 在代码中配置API密钥
+                3. 启用相应的数据源
+                <br>
+                <a href="https://open.tianyancha.com" target="_blank">→ 申请天眼查API</a> |
+                <a href="https://open.qichacha.com" target="_blank">→ 申请企查查API</a>
+            </div>
+        </div>
+        
+        <div id="error-message" class="error-message" style="display: none;">
+            <strong><i class="fas fa-exclamation-triangle"></i> 查询失败</strong>
+            <p id="error-text">企业信息查询失败，请稍后重试。</p>
+        </div>
+    </div>
+
+    <!-- 认证模态框（与主站一致） -->
+    <div id="auth-modal" class="auth-modal">
+        <!-- 模态框内容与主站相同 -->
+        <!-- 为节省篇幅，这里省略重复内容 -->
+    </div>
+
+    <script src="js/auth-fixed.js"></script>
+    <script>
+        // 企业查询功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchForm = document.getElementById('company-search-form');
+            const companyInput = document.getElementById('company-input');
+            const resultContainer = document.getElementById('result-container');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            const sourceButtons = document.querySelectorAll('.source-btn');
+            
+            let currentSource = 'mock';
+            
+            // 数据源切换
+            sourceButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    sourceButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentSource = this.dataset.source;
+                    
+                    // 显示提示
+                    if (currentSource !== 'mock') {
+                        showMessage(`已切换到${getSourceName(currentSource)}，需要配置API密钥`, 'info');
+                    }
+                });
+            });
+            
+            // 表单提交
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const companyName = companyInput.value.trim();
+                if (!companyName) {
+                    showMessage('请输入企业名称', 'error');
+                    return;
+                }
+                
+                searchCompany(companyName);
+            });
+            
+            // 搜索企业
+            function searchCompany(companyName) {
+                // 显示加载中
+                loading.style.display = 'block';
+                resultContainer.classList.remove('show');
+                errorMessage.style.display = 'none';
+                
+                // 模拟API请求延迟
+                setTimeout(() => {
+                    const result = getMockCompanyData(companyName);
+                    
+                    loading.style.display = 'none';
+                    
+                    if (result.error) {
+                        showError(result.error);
+                    } else {
+                        displayCompanyInfo(result);
+                    }
+                }, 1500);
+            }
+            
+            // 获取模拟数据
+            function getMockCompanyData(companyName) {
+                // 这里应该调用真实API，目前返回模拟数据
+                const mockData = {
+                    name: companyName || '阿里巴巴(中国)有限公司',
+                    creditCode: '91330100' + Math.random().toString(36).substr(2, 10).toUpperCase(),
+                    legalPerson: getRandomChineseName(),
+                    regCapital: getRandomCapital(),
+                    establishDate: getRandomDate(),
+                    status: Math.random() > 0.2 ? '存续' : '注销',
+                    companyType: '有限责任公司',
+                    industry: '互联网和相关服务',
+                    address: '浙江省杭州市余杭区五常街道文一西路969号',
+                    businessScope: '技术开发、技术服务、技术咨询、技术转让；计算机系统服务；数据处理；基础软件服务；应用软件服务；设计、制作、代理、发布广告；货物进出口、技术进出口、代理进出口。',
+                    regOffice: '浙江省市场监督管理局',
+                    businessTerm: '2007-03-26 至 长期',
+                    shareholders: 'Taobao China Holding Limited',
+                    shareholderType: '境外法人',
+                    source: currentSource,
+                    note: currentSource === 'mock' ? '演示数据，非真实信息' : '需要配置API密钥获取真实数据'
+                };
+                
+                return mockData;
+            }
+            
+            // 显示企业信息
+            function displayCompanyInfo(data) {
+                // 更新UI
+                document.getElementById('result-company-name').textContent = data.name;
+                document.getElementById('result-status').textContent = data.status;
+                document.getElementById('result-status').className = `company-status ${data.status === '存续' ? '' : 'closed'}`;
+                
+                document.getElementById('info-credit-code').textContent = data.creditCode;
+                document.getElementById('info-legal-person').textContent = data.legalPerson;
+                document.getElementById('info-reg-capital').textContent = data.regCapital;
+                document.getElementById('info-establish-date').textContent = data.establishDate;
+                document.getElementById('info-company-type').textContent = data.companyType;
+                document.getElementById('info-industry').textContent = data.industry;
+                document.getElementById('info-address').textContent = data.address;
+                document.getElementById('info-business-scope').textContent = data.businessScope.length > 50 ? 
+                    data.businessScope.substring(0, 50) + '...' : data.businessScope;
+                document.getElementById('info-reg-office').textContent = data.regOffice;
+                document.getElementById('info-business-term').textContent = data.businessTerm;
+                document.getElementById('info-shareholders').textContent = data.shareholders;
+                document.getElementById('info-shareholder-type').textContent = data.shareholderType;
+                
+                // 显示结果容器
+                resultContainer.classList.add('show');
+                
+                // 滚动到结果
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // 显示错误
+            function showError(message) {
+                document.getElementById('error-text').textContent = message;
+                errorMessage.style.display = 'block';
+            }
+            
+            // 显示消息
+            function showMessage(message, type = 'info') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type} show`;
+                messageDiv.innerHTML = `<strong>${type === 'error' ? '❌' : 'ℹ️'}</strong> ${message}`;
+                messageDiv.style.position = 'fixed';
+                messageDiv.style.top = '100px';
+                messageDiv.style.right = '20px';
+                messageDiv.style.zIndex = '10000';
+                messageDiv.style.maxWidth = '300px';
+                
+                document.body.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 3000);
+            }
+            
+            // 辅助函数
+            function getRandomChineseName() {
+                const surnames = ['张', '王', '李', '赵', '刘', '陈', '杨', '黄', '周', '吴'];
+                const givenNames = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '军'];
+                return surnames[Math.floor(Math.random() * surnames.length)] + 
+                       givenNames[Math.floor(Math.random() * givenNames.length)];
+            }
+            
+            function getRandomCapital() {
+                const amounts = ['100万', '500万', '1000万', '5000万', '1亿', '10亿', '100亿'];
+                return amounts[Math.floor(Math.random() * amounts.length)] + '人民币';
+            }
+            
+            function getRandomDate() {
+                const year = 2000 + Math.floor(Math.random() * 24);
+                const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+                const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            function getSourceName(source) {
+                const names = {
+                    'mock': '演示数据',
+                    'tianyancha': '天眼查',
+                    'qichacha': '企查查',
+                    'aiqicha': '爱企查'
+                };
+                return names[source] || source;
+            }
+            
+            // 初始加载示例数据
+            searchCompany('阿里巴巴(中国)有限公司');
+        });
+    </script>
+</body>
+</html>
