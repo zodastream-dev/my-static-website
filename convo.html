@@ -79,9 +79,34 @@
             border: 1px solid var(--primary-color);
         }
         
+        .login-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
         .register-btn {
             background: var(--primary-color);
             color: white;
+        }
+        
+        .register-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        /* 删除按钮样式 */
+        .delete-chat-btn {
+            background: transparent;
+            border: none;
+            color: #8a94a6;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-chat-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
         }
         
         .main-container {
@@ -452,13 +477,17 @@
         <div class="logo">
             <i class="fas fa-robot"></i>
             <span>OpenClaw AI 助手</span>
+            <a href="/" class="home-link" style="margin-left: 20px; font-size: 16px; color: #667eea; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-home"></i>
+                首页
+            </a>
         </div>
         <div class="user-menu">
-            <button class="login-btn">
+            <button class="login-btn" onclick="showLoginModal()">
                 <i class="fas fa-sign-in-alt"></i>
                 登录
             </button>
-            <button class="register-btn">
+            <button class="register-btn" onclick="showRegisterModal()">
                 <i class="fas fa-user-plus"></i>
                 注册
             </button>
@@ -609,7 +638,6 @@
                     const chatItem = document.createElement('div');
                     chatItem.className = `chat-item ${this.currentChatId === chat.id ? 'active' : ''}`;
                     chatItem.dataset.chatId = chat.id;
-                    chatItem.onclick = () => this.loadChat(chat.id);
                     
                     const lastMessage = chat.messages[chat.messages.length - 1];
                     const preview = lastMessage ? 
@@ -630,7 +658,13 @@
                                 <span class="message-count">${chat.messages.length} 条消息</span>
                             </div>
                         </div>
+                        <button class="delete-chat-btn" onclick="event.stopPropagation(); chatManager.deleteChat('${chat.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     `;
+                    
+                    // 点击聊天项时加载聊天
+                    chatItem.onclick = () => this.loadChat(chat.id);
                     
                     chatList.appendChild(chatItem);
                 });
@@ -778,6 +812,25 @@
                 return div.innerHTML;
             }
             
+            deleteChat(chatId) {
+                if (confirm('确定要删除这个对话吗？')) {
+                    this.chats = this.chats.filter(chat => chat.id !== chatId);
+                    
+                    if (this.currentChatId === chatId) {
+                        this.currentChatId = null;
+                        this.clearChatMessages();
+                    }
+                    
+                    this.saveChats();
+                    this.renderChatList();
+                    
+                    // 如果没有聊天了，创建一个新的
+                    if (this.chats.length === 0) {
+                        this.startNewChat();
+                    }
+                }
+            }
+            
             clearChatHistory() {
                 if (confirm('确定要清空所有聊天记录吗？此操作不可恢复。')) {
                     this.chats = [];
@@ -844,6 +897,258 @@
             chatManager.clearChatHistory();
         }
 
+        // 认证系统
+        class AuthSystem {
+            constructor() {
+                this.usersKey = 'openclaw_users';
+                this.currentUserKey = 'openclaw_current_user';
+                this.init();
+            }
+
+            init() {
+                if (!this.getUsers()) {
+                    this.setUsers([]);
+                }
+                this.updateUI();
+                this.bindEvents();
+            }
+
+            getUsers() {
+                const users = localStorage.getItem(this.usersKey);
+                return users ? JSON.parse(users) : null;
+            }
+
+            setUsers(users) {
+                localStorage.setItem(this.usersKey, JSON.stringify(users));
+            }
+
+            getUser(username) {
+                const users = this.getUsers();
+                return users ? users.find(u => u.username === username) : null;
+            }
+
+            addUser(user) {
+                const users = this.getUsers();
+                users.push(user);
+                this.setUsers(users);
+            }
+
+            getCurrentUser() {
+                const user = localStorage.getItem(this.currentUserKey);
+                return user ? JSON.parse(user) : null;
+            }
+
+            setCurrentUser(user) {
+                if (user) {
+                    localStorage.setItem(this.currentUserKey, JSON.stringify(user));
+                } else {
+                    localStorage.removeItem(this.currentUserKey);
+                }
+            }
+
+            login(username, password) {
+                const user = this.getUser(username);
+                if (!user) {
+                    return { success: false, message: '用户不存在' };
+                }
+                if (user.password !== password) {
+                    return { success: false, message: '密码错误' };
+                }
+                this.setCurrentUser(user);
+                this.updateUI();
+                return { success: true, message: '登录成功' };
+            }
+
+            register(username, password) {
+                if (this.getUser(username)) {
+                    return { success: false, message: '用户名已存在' };
+                }
+                if (username.length < 3 || username.length > 20) {
+                    return { success: false, message: '用户名长度需为3-20位' };
+                }
+                if (password.length !== 8) {
+                    return { success: false, message: '密码必须为8位' };
+                }
+                if (!/[a-zA-Z]/.test(password)) {
+                    return { success: false, message: '密码必须包含字母' };
+                }
+                if (!/[0-9]/.test(password)) {
+                    return { success: false, message: '密码必须包含数字' };
+                }
+                
+                const newUser = {
+                    username: username,
+                    password: password,
+                    createdAt: new Date().toISOString()
+                };
+                
+                this.addUser(newUser);
+                this.setCurrentUser(newUser);
+                this.updateUI();
+                return { success: true, message: '注册成功' };
+            }
+
+            logout() {
+                this.setCurrentUser(null);
+                this.updateUI();
+                return { success: true, message: '已退出登录' };
+            }
+
+            updateUI() {
+                const userMenu = document.querySelector('.user-menu');
+                if (!userMenu) return;
+                
+                const currentUser = this.getCurrentUser();
+                
+                if (currentUser) {
+                    userMenu.innerHTML = `
+                        <div class="user-info">
+                            <span>${currentUser.username}</span>
+                            <button class="logout-btn" onclick="authSystem.logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                退出
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    userMenu.innerHTML = `
+                        <button class="login-btn" onclick="showLoginModal()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            登录
+                        </button>
+                        <button class="register-btn" onclick="showRegisterModal()">
+                            <i class="fas fa-user-plus"></i>
+                            注册
+                        </button>
+                    `;
+                }
+            }
+
+            bindEvents() {
+                // 绑定登录表单
+                const loginForm = document.getElementById('login-form');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const username = document.getElementById('login-username').value;
+                        const password = document.getElementById('login-password').value;
+                        const result = this.login(username, password);
+                        this.showMessage(result.message, result.success);
+                        if (result.success) {
+                            setTimeout(() => this.closeAuthModal(), 1000);
+                        }
+                    });
+                }
+
+                // 绑定注册表单
+                const registerForm = document.getElementById('register-form');
+                if (registerForm) {
+                    registerForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const username = document.getElementById('register-username').value;
+                        const password = document.getElementById('register-password').value;
+                        const confirmPassword = document.getElementById('register-confirm-password').value;
+                        
+                        if (password !== confirmPassword) {
+                            this.showMessage('两次输入的密码不一致', false);
+                            return;
+                        }
+                        
+                        const result = this.register(username, password);
+                        this.showMessage(result.message, result.success);
+                        if (result.success) {
+                            setTimeout(() => this.closeAuthModal(), 1000);
+                        }
+                    });
+                }
+
+                // 绑定关闭按钮
+                const closeBtn = document.getElementById('close-auth-modal');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => this.closeAuthModal());
+                }
+
+                // 绑定标签切换
+                const loginTab = document.getElementById('login-tab');
+                const registerTab = document.getElementById('register-tab');
+                
+                if (loginTab) {
+                    loginTab.addEventListener('click', () => this.switchTab('login'));
+                }
+                if (registerTab) {
+                    registerTab.addEventListener('click', () => this.switchTab('register'));
+                }
+            }
+
+            showMessage(message, isSuccess = true) {
+                const messageDiv = document.getElementById('auth-message');
+                if (messageDiv) {
+                    messageDiv.textContent = message;
+                    messageDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
+                    messageDiv.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                }
+            }
+
+            showLoginModal() {
+                this.openAuthModal();
+                this.switchTab('login');
+            }
+
+            showRegisterModal() {
+                this.openAuthModal();
+                this.switchTab('register');
+            }
+
+            openAuthModal() {
+                const modal = document.getElementById('auth-modal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            }
+
+            closeAuthModal() {
+                const modal = document.getElementById('auth-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+            switchTab(tabName) {
+                const loginTab = document.getElementById('login-tab');
+                const registerTab = document.getElementById('register-tab');
+                const loginForm = document.getElementById('login-form');
+                const registerForm = document.getElementById('register-form');
+                
+                if (tabName === 'login') {
+                    loginTab?.classList.add('active');
+                    registerTab?.classList.remove('active');
+                    loginForm?.classList.add('active');
+                    registerForm?.classList.remove('active');
+                } else {
+                    loginTab?.classList.remove('active');
+                    registerTab?.classList.add('active');
+                    loginForm?.classList.remove('active');
+                    registerForm?.classList.add('active');
+                }
+            }
+        }
+
+        // 创建全局认证系统实例
+        const authSystem = new AuthSystem();
+
+        // 全局函数
+        function showLoginModal() {
+            authSystem.showLoginModal();
+        }
+
+        function showRegisterModal() {
+            authSystem.showRegisterModal();
+        }
+
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
             chatManager.initialize = function() {
@@ -860,6 +1165,215 @@
             
             chatManager.initialize();
         });
+
+        // 添加认证模态框的CSS样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .auth-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            }
+            
+            .auth-container {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+                width: 90%;
+                max-width: 400px;
+                overflow: hidden;
+            }
+            
+            .auth-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 24px;
+                text-align: center;
+                position: relative;
+            }
+            
+            .auth-header h2 {
+                margin: 0;
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+            
+            .auth-tabs {
+                display: flex;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            
+            .auth-tab {
+                flex: 1;
+                padding: 16px;
+                background: none;
+                border: none;
+                font-size: 16px;
+                font-weight: 500;
+                color: #6b7280;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .auth-tab.active {
+                color: #667eea;
+                border-bottom: 2px solid #667eea;
+            }
+            
+            .auth-content {
+                padding: 24px;
+            }
+            
+            .auth-form {
+                display: none;
+            }
+            
+            .auth-form.active {
+                display: block;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 500;
+                color: #374151;
+            }
+            
+            .form-control {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 8px;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+            
+            .form-control:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+            }
+            
+            .btn-auth {
+                width: 100%;
+                padding: 14px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-auth:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+            }
+            
+            .message {
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                display: none;
+            }
+            
+            .message.success {
+                background: #d1fae5;
+                color: #065f46;
+            }
+            
+            .message.error {
+                background: #fee2e2;
+                color: #991b1b;
+            }
+            
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .user-info span {
+                font-weight: 500;
+                color: #333;
+            }
+            
+            .logout-btn {
+                padding: 6px 12px;
+                background: transparent;
+                color: #ef4444;
+                border: 1px solid #ef4444;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
+
+    <!-- 认证模态框 -->
+    <div id="auth-modal" class="auth-modal">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2>用户认证</h2>
+                <button id="close-auth-modal" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="login-tab">登录</button>
+                <button class="auth-tab" id="register-tab">注册</button>
+            </div>
+            
+            <div class="auth-content">
+                <div id="auth-message" class="message"></div>
+                
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label for="login-username">用户名</label>
+                        <input type="text" id="login-username" class="form-control" placeholder="请输入用户名" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">密码</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="请输入8位密码" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">登录</button>
+                </form>
+                
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username">用户名</label>
+                        <input type="text" id="register-username" class="form-control" placeholder="3-20位字母和数字" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">密码</label>
+                        <input type="password" id="register-password" class="form-control" placeholder="8位字母和数字组合" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-confirm-password">确认密码</label>
+                        <input type="password" id="register-confirm-password" class="form-control" placeholder="再次输入密码" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-auth">注册</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
