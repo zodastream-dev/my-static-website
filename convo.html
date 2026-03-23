@@ -302,7 +302,11 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            min-height: 200px; /* 确保聊天区域有足够高度 */
+            min-height: 300px; /* 增加最小高度 */
+            max-height: calc(100vh - 300px); /* 限制最大高度 */
+            background: white; /* 确保背景色 */
+            border-radius: 8px; /* 添加圆角 */
+            border: 1px solid #e5e7eb; /* 添加边框 */
         }
         
         .message {
@@ -725,6 +729,19 @@
                 }
                 
                 console.log('✅ 找到消息容器');
+                
+                // 检查容器可见性
+                const rect = messagesContainer.getBoundingClientRect();
+                console.log(`📏 容器尺寸: ${rect.width}x${rect.height}`);
+                console.log(`📍 容器位置: top=${rect.top}, left=${rect.left}`);
+                console.log(`👁️ 容器可见: ${rect.width > 0 && rect.height > 0 ? '是' : '否'}`);
+                
+                // 确保容器可见
+                messagesContainer.style.display = 'flex';
+                messagesContainer.style.flexDirection = 'column';
+                messagesContainer.style.visibility = 'visible';
+                messagesContainer.style.opacity = '1';
+                
                 messagesContainer.innerHTML = '';
                 
                 messages.forEach((message, index) => {
@@ -745,6 +762,20 @@
                     console.log(`✅ 消息 ${index + 1} HTML:`, messageElement.innerHTML);
                     messagesContainer.appendChild(messageElement);
                 });
+                
+                // 检查渲染结果
+                const renderedMessages = messagesContainer.querySelectorAll('.message');
+                console.log(`📊 实际渲染消息数量: ${renderedMessages.length}`);
+                
+                if (renderedMessages.length === messages.length) {
+                    console.log('✅ 所有消息成功渲染到主界面');
+                } else {
+                    console.log(`❌ 消息渲染不匹配: 应有 ${messages.length} 条, 实际 ${renderedMessages.length} 条`);
+                    console.log('🔍 检查容器样式:');
+                    console.log(`   显示: ${messagesContainer.style.display}`);
+                    console.log(`   可见性: ${messagesContainer.style.visibility}`);
+                    console.log(`   透明度: ${messagesContainer.style.opacity}`);
+                }
                 
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 console.log('🎯 消息渲染完成，已滚动到底部');
