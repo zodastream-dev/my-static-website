@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天功能本地测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .test-description {
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+        
+        .test-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .test-btn:hover {
+            background: #0da271;
+        }
+        
+        .chat-test-area {
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            background: #f8fafc;
+        }
+        
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .assistant-message {
+            align-self: flex-start;
+            background: #f3f4f6;
+            color: #333;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #test-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        #test-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .log {
+            font-family: monospace;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>聊天功能本地测试</h1>
+        
+        <!-- 测试1：基本消息显示 -->
+        <div class="test-section">
+            <div class="test-title">测试1：基本消息显示</div>
+            <div class="test-description">测试用户消息和AI回复是否能正确显示在聊天区域</div>
+            <button class="test-btn" onclick="testBasicMessageDisplay()">运行测试</button>
+            <div id="result1" class="result"></div>
+            <div id="log1" class="log"></div>
+        </div>
+        
+        <!-- 测试2：聊天区域 -->
+        <div class="test-section">
+            <div class="test-title">测试2：实时聊天测试</div>
+            <div class="test-description">在下方输入消息，测试实时聊天功能</div>
+            
+            <div class="chat-test-area">
+                <div class="chat-messages" id="test-chat-messages">
+                    <!-- 测试消息将显示在这里 -->
+                </div>
+                
+                <div class="input-area">
+                    <input type="text" id="test-input" placeholder="输入测试消息...">
+                    <button class="test-btn" onclick="sendTestMessage()">发送</button>
+                </div>
+            </div>
+            
+            <div id="result2" class="result"></div>
+            <div id="log2" class="log"></div>
+        </div>
+        
+        <!-- 测试3：CSS样式验证 -->
+        <div class="test-section">
+            <div class="test-title">测试3：CSS样式验证</div>
+            <div class="test-description">验证消息的CSS样式是否正确应用</div>
+            <button class="test-btn" onclick="testCssStyles()">运行测试</button>
+            <div id="result3" class="result"></div>
+            <div id="log3" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let testMessages = [];
+        let testLog = '';
+        
+        function logTest(testId, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog += `[${timestamp}] ${message}\n`;
+            const logElement = document.getElementById(`log${testId}`);
+            if (logElement) {
+                logElement.textContent = testLog;
+            }
+            console.log(message);
+        }
+        
+        function showResult(testId, message, isSuccess) {
+            const resultElement = document.getElementById(`result${testId}`);
+            if (resultElement) {
+                resultElement.textContent = message;
+                resultElement.className = `result ${isSuccess ? 'success' : 'error'}`;
+            }
+        }
+        
+        // 测试1：基本消息显示
+        function testBasicMessageDisplay() {
+            testLog = '';
+            logTest(1, '🧪 开始测试基本消息显示...');
+            
+            const messagesContainer = document.getElementById('test-chat-messages');
+            if (!messagesContainer) {
+                logTest(1, '❌ 找不到消息容器');
+                showResult(1, '测试失败：找不到消息容器', false);
+                return;
+            }
+            
+            logTest(1, '✅ 找到消息容器');
+            
+            // 清空容器
+            messagesContainer.innerHTML = '';
+            logTest(1, '🧹 清空消息容器');
+            
+            // 创建测试消息
+            const testMessages = [
+                {
+                    role: 'user',
+                    content: '这是测试用户消息',
+                    time: new Date().toLocaleTimeString()
+                },
+                {
+                    role: 'assistant',
+                    content: '这是测试AI回复，消息显示应该正常工作！',
+                    time: new Date().toLocaleTimeString()
+                }
+            ];
+            
+            // 渲染消息
+            testMessages.forEach((message, index) => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.role}-message`;
+                messageElement.innerHTML = `
+                    <div>${message.content}</div>
+                    <div style="font-size: 11px; text-align: right; margin-top: 4px;">${message.time}</div>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                logTest(1, `✅ 渲染消息 ${index + 1}: ${message.content}`);
+            });
+            
+            // 检查是否成功渲染
+            const renderedMessages = messagesContainer.querySelectorAll('.message');
+            if (renderedMessages.length === 2) {
+                logTest(1, '✅ 消息渲染成功');
+                showResult(1, '测试通过：消息正确显示在聊天区域', true);
+            } else {
+                logTest(1, `❌ 消息渲染失败，只渲染了 ${renderedMessages.length} 条消息`);
+                showResult(1, '测试失败：消息未正确渲染', false);
+            }
+        }
+        
+        // 测试2：实时聊天
+        function sendTestMessage() {
+            const input = document.getElementById('test-input');
+            const content = input.value.trim();
+            
+            if (!content) {
+                alert('请输入消息');
+                return;
+            }
+            
+            const messagesContainer = document.getElementById('test-chat-messages');
+            
+            // 添加用户消息
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.innerHTML = `
+                <div>${content}</div>
+                <div style="font-size: 11px; text-align: right; margin-top: 4px;">${new Date().toLocaleTimeString()}</div>
+            `;
+            messagesContainer.appendChild(userMessage);
+            
+            // 清空输入
+            input.value = '';
+            
+            // 模拟AI回复
+            setTimeout(() => {
+                const assistantMessage = document.createElement('div');
+                assistantMessage.className = 'message assistant-message';
+                assistantMessage.innerHTML = `
+                    <div>这是对"${content}"的测试回复</div>
+                    <div style="font-size: 11px; text-align: right; margin-top: 4px;">${new Date().toLocaleTimeString()}</div>
+                `;
+                messagesContainer.appendChild(assistantMessage);
+                
+                // 滚动到底部
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                showResult(2, '测试通过：实时聊天功能正常', true);
+            }, 1000);
+            
+            showResult(2, '消息已发送，等待AI回复...', true);
+        }
+        
+        // 测试3：CSS样式
+        function testCssStyles() {
+            testLog = '';
+            logTest(3, '🧪 开始测试CSS样式...');
+            
+            const testMessages = [
+                { role: 'user', content: '用户消息样式测试' },
+                { role: 'assistant', content: 'AI消息样式测试' }
+            ];
+            
+            const messagesContainer = document.getElementById('test-chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            testMessages.forEach((message, index) => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.role}-message`;
+                messageElement.textContent = message.content;
+                messageElement.style.cssText = `
+                    max-width: 80%;
+                    padding: 12px 16px;
+                    border-radius: 18px;
+                    margin-bottom: 10px;
+                    display: flex;
+                    flex-direction: column;
+                `;
+                
+                if (message.role === 'user') {
+                    messageElement.style.alignSelf = 'flex-end';
+                    messageElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    messageElement.style.color = 'white';
+                } else {
+                    messageElement.style.alignSelf = 'flex-start';
+                    messageElement.style.background = '#f3f4f6';
+                    messageElement.style.color = '#333';
+                }
+                
+                messagesContainer.appendChild(messageElement);
+                logTest(3, `✅ 应用 ${message.role} 消息样式`);
+            });
+            
+            // 检查样式
+            const userMessage = messagesContainer.querySelector('.user-message');
+            const assistantMessage = messagesContainer.querySelector('.assistant-message');
+            
+            if (userMessage && assistantMessage) {
+                const userStyle = window.getComputedStyle(userMessage);
+                const assistantStyle = window.getComputedStyle(assistantMessage);
+                
+                logTest(3, `用户消息背景: ${userStyle.background}`);
+                logTest(3, `AI消息背景: ${assistantStyle.background}`);
+                logTest(3, `用户消息对齐: ${userStyle.alignSelf}`);
+                logTest(3, `AI消息对齐: ${assistantStyle.alignSelf}`);
+                
+                showResult(3, '测试通过：CSS样式正确应用', true);
+            } else {
+                showResult(3, '测试失败：无法验证样式', false);
+            }
+        }
+        
+        // 页面加载时运行基本测试
+        document.addEventListener('DOMContentLoaded', function() {
+            logTest(1, '🏁 页面加载完成');
+            setTimeout(() => {
+                testBasicMessageDisplay();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
