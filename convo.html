@@ -571,6 +571,14 @@
                     <div class="attachments-preview" id="attachments-preview"></div>
                 </div>
 
+                <!-- 测试按钮 -->
+                <div class="test-section">
+                    <button class="test-btn" onclick="testMessageDisplay()" title="测试消息显示" style="background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
+                        <i class="fas fa-vial"></i>
+                        测试
+                    </button>
+                </div>
+
                 <!-- 发送按钮 -->
                 <div class="send-section">
                     <button class="send-btn" onclick="sendMessage()" id="send-btn">
@@ -688,12 +696,19 @@
             }
             
             renderChatMessages(messages) {
+                console.log('🎨 renderChatMessages 被调用，消息数量:', messages.length);
                 const messagesContainer = document.getElementById('chat-messages');
-                if (!messagesContainer) return;
+                if (!messagesContainer) {
+                    console.log('❌ 找不到消息容器');
+                    return;
+                }
                 
+                console.log('✅ 找到消息容器');
                 messagesContainer.innerHTML = '';
                 
-                messages.forEach(message => {
+                messages.forEach((message, index) => {
+                    console.log(`📄 渲染消息 ${index + 1}:`, message.content.substring(0, 30) + '...');
+                    
                     const messageElement = document.createElement('div');
                     messageElement.className = `message ${message.role}-message`;
                     
@@ -706,10 +721,12 @@
                         <div class="message-time">${timeStr}</div>
                     `;
                     
+                    console.log(`✅ 消息 ${index + 1} HTML:`, messageElement.innerHTML);
                     messagesContainer.appendChild(messageElement);
                 });
                 
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                console.log('🎯 消息渲染完成，已滚动到底部');
             }
             
             clearChatMessages() {
@@ -720,17 +737,28 @@
             }
             
             sendMessageFromInput() {
+                console.log('🔍 sendMessageFromInput 被调用');
                 const input = document.getElementById('main-input');
                 const content = input.value.trim();
+                console.log('📝 输入内容:', content);
                 
-                if (!content) return;
+                if (!content) {
+                    console.log('⚠️ 内容为空，返回');
+                    return;
+                }
                 
                 if (!this.currentChatId) {
+                    console.log('🆕 没有当前聊天，创建新聊天');
                     this.startNewChat();
                 }
                 
                 const chat = this.chats.find(c => c.id === this.currentChatId);
-                if (!chat) return;
+                if (!chat) {
+                    console.log('❌ 找不到聊天:', this.currentChatId);
+                    return;
+                }
+                
+                console.log('✅ 找到聊天:', chat.title);
                 
                 const userMessage = {
                     id: `msg_${Date.now()}`,
@@ -740,14 +768,18 @@
                 };
                 
                 chat.messages.push(userMessage);
+                console.log('📤 用户消息已添加，消息总数:', chat.messages.length);
                 
                 if (chat.messages.length === 1) {
                     chat.title = this.generateChatTitle(content);
+                    console.log('📝 更新聊天标题:', chat.title);
                 }
                 
                 chat.updatedAt = new Date().toISOString();
                 this.saveChats();
+                console.log('💾 聊天已保存');
                 
+                console.log('🎨 开始渲染消息...');
                 this.renderChatMessages(chat.messages);
                 this.renderChatList();
                 
@@ -755,6 +787,7 @@
                 input.focus();
                 
                 setTimeout(() => {
+                    console.log('🤖 生成AI回复...');
                     const assistantMessage = {
                         id: `msg_${Date.now()}`,
                         role: 'assistant',
@@ -766,6 +799,7 @@
                     chat.updatedAt = new Date().toISOString();
                     this.saveChats();
                     
+                    console.log('🤖 AI回复已添加，消息总数:', chat.messages.length);
                     this.renderChatMessages(chat.messages);
                     this.renderChatList();
                 }, 1000);
@@ -903,6 +937,61 @@
         
         function clearChatHistory() {
             chatManager.clearChatHistory();
+        }
+        
+        // 测试消息显示
+        function testMessageDisplay() {
+            console.log('🧪 开始测试消息显示...');
+            
+            // 如果没有当前聊天，创建一个
+            if (!chatManager.currentChatId) {
+                console.log('🆕 创建测试聊天');
+                chatManager.startNewChat();
+            }
+            
+            const chat = chatManager.chats.find(c => c.id === chatManager.currentChatId);
+            if (!chat) {
+                console.log('❌ 找不到测试聊天');
+                return;
+            }
+            
+            console.log('✅ 找到测试聊天:', chat.title);
+            
+            // 添加测试消息
+            const testMessages = [
+                {
+                    id: `test_msg_${Date.now()}_1`,
+                    role: 'user',
+                    content: '这是测试用户消息',
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: `test_msg_${Date.now()}_2`,
+                    role: 'assistant',
+                    content: '这是测试AI回复，消息显示应该正常工作！',
+                    timestamp: new Date().toISOString()
+                }
+            ];
+            
+            // 清空现有消息
+            chat.messages = [];
+            
+            // 添加测试消息
+            testMessages.forEach(msg => {
+                chat.messages.push(msg);
+                console.log('📤 添加测试消息:', msg.content);
+            });
+            
+            chat.updatedAt = new Date().toISOString();
+            chatManager.saveChats();
+            
+            // 渲染消息
+            console.log('🎨 渲染测试消息...');
+            chatManager.renderChatMessages(chat.messages);
+            chatManager.renderChatList();
+            
+            console.log('✅ 测试完成，请查看页面');
+            alert('测试完成！请查看聊天区域是否显示测试消息。');
         }
 
         // 认证系统
