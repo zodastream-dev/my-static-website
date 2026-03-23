@@ -1,0 +1,12 @@
+{
+  "version": "1.0.1",
+  "build": "2026.03.24.0449",
+  "description": "OpenClaw AI Chat Interface",
+  "lastUpdated": "2026-03-23T20:49:38Z",
+  "features": [
+    "完整的AI聊天界面",
+    "聊天历史管理",
+    "共享用户认证系统",
+    "响应式设计"
+  ]
+}
